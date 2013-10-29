@@ -10,7 +10,7 @@ using namespace std;
 void printStudents()
 {
 	cout << "Julian Arnold, 293370" << endl;
-	cout << "Student Name 1, matrikel number 1" << endl;
+	cout << "Marius Lipka, 334336" << endl;
 	cout << "Student Name 2, matrikel number 2" << endl;
 	cout << "Student Name 3, matrikel number 3" << endl;
 }
