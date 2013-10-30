@@ -9,10 +9,10 @@ using namespace std;
 // add your team members names and matrikel numbers here:
 void printStudents()
 {
-	cout << "Julian Arnold, 293370" << endl;
-	cout << "Marius Lipka, 334336" << endl;
-	cout << "Student Name 2, matrikel number 2" << endl;
-	cout << "Student Name 3, matrikel number 3" << endl;
+	cout << "Julian Arnold,  293370" << endl;
+	cout << "Marius Lipka,   334336" << endl;
+	cout << "Florian George, 234236" << endl;
+	cout << "Houman Biglari, 279942" << endl;
 }
 
 void drawScene(int scene, float runTime) {
