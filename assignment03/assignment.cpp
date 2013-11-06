@@ -6,13 +6,15 @@
 #include <gl_core_32.hh>
 using namespace std;
 
+#define M_PI 3.14159265359 // had to be defined manually as it's not natively defined in vs2008
+
 // add your team members names and matrikel numbers here:
 void printStudents()
 {
-	cout << "Student Name 0, matrikel number 0" << endl;
-	cout << "Student Name 1, matrikel number 1" << endl;
-	cout << "Student Name 2, matrikel number 2" << endl;
-	cout << "Student Name 3, matrikel number 3" << endl;
+	cout << "Julian Arnold,  293370" << endl;
+	cout << "Marius Lipka,   334336" << endl;
+	cout << "Florian George, 234236" << endl;
+	cout << "Houman Biglari, 279942" << endl;
 }
 
 
@@ -70,7 +72,7 @@ glm::mat4 getRotationMatrixYAxis( float angle ) {
     return r;
 }
 
-glm::mat4 buildFrustum( float phiInDegree, float aspectRatio, float near, float far) {
+glm::mat4 buildFrustum( float phiInDegree, float aspectRatio, float n, float f) {
 
     glm::mat4 fm;
 
@@ -78,6 +80,34 @@ glm::mat4 buildFrustum( float phiInDegree, float aspectRatio, float near, float 
     // buildFrustum function for programming exercise part b:
     // Add your code here:
     // ====================================================================
+
+    // renamed near to n and far to f in the function definition because near/far are already defined in WinDef.h, resulting in error C2100: ungültige Referenzierung
+
+    const float t =      n * tan( (phiInDegree   / 2.0f) * (M_PI / 180.0f) );
+    const float b = -1 * n * tan( (phiInDegree   / 2.0f) * (M_PI / 180.0f) );
+    const float thetaInDegree = phiInDegree * aspectRatio;
+    const float r =      n * tan( (thetaInDegree / 2.0f) * (M_PI / 180.0f) );
+    const float l = -1 * n * tan( (thetaInDegree / 2.0f) * (M_PI / 180.0f) );
+
+    fm[0][0] = (2.0f * n) / (r - l);
+    fm[0][1] = 0;
+    fm[0][2] = 0;
+    fm[0][3] = 0;
+
+    fm[1][0] = 0;
+    fm[1][1] = (2.0f * n) / (t - b);
+    fm[1][2] = 0;
+    fm[1][3] = 0;
+
+    fm[2][0] = (r + l) / (r - l);
+    fm[2][1] = (t + b) / (t - b);
+    fm[2][2] = -1.0f * ( (f + n) / (f - n) );
+    fm[2][3] = -1.0f;
+
+    fm[3][0] = 0;
+    fm[3][1] = 0;
+    fm[3][2] = -1.0f * ( (2.0f * f * n) / (f - n) );
+    fm[3][3] = 0;
 
     // ====================================================================
     // End Exercise code
@@ -93,7 +123,35 @@ glm::mat4 lookAt(const glm::vec3 &camPos, const glm::vec3 &viewDirection, const 
     // Add your code here:
     // ====================================================================
 
-    //return matrix;
+    const glm::vec3 d_norm  = glm::normalize(viewDirection);
+    const glm::vec3 r       = glm::cross(viewDirection, up);
+    const glm::vec3 r_norm  = glm::normalize(r);
+    const glm::vec3 u       = glm::cross(r, viewDirection);
+    const glm::vec3 u_norm  = glm::normalize(u);
+
+    glm::mat4 matrix;
+
+    matrix[0][0] = r_norm.x;
+    matrix[1][0] = r_norm.y;
+    matrix[2][0] = r_norm.z;
+    
+    matrix[0][1] = u_norm.x;
+    matrix[1][1] = u_norm.y;
+    matrix[2][1] = u_norm.z;
+    
+    matrix[0][2] = -d_norm.x;
+    matrix[1][2] = -d_norm.y;
+    matrix[2][2] = -d_norm.z;
+    
+    const float rtc = r_norm.x * camPos.x + r_norm.y * camPos.y + r_norm.z * camPos.z;
+    const float utc = u_norm.x * camPos.x + u_norm.y * camPos.y + u_norm.z * camPos.z;
+    const float dtc = d_norm.x * camPos.x + d_norm.y * camPos.y + d_norm.z * camPos.z;
+
+    matrix[3][0] = -1.0f * rtc;
+    matrix[3][1] = -1.0f * utc;
+    matrix[3][2] =         dtc;
+
+    return matrix;
 
     // ====================================================================
     // End Exercise code
@@ -108,6 +166,10 @@ void resizeCallback( int newWidth, int newHeight )
     // projection matrix setup for programming exercise part d:
     // Add your code here:
     // ====================================================================
+
+    const float     aspectRatio      = static_cast<float>(newWidth) / static_cast<float>(newHeight);
+    const glm::mat4 projectionMatrix = buildFrustum(90.0f, aspectRatio, 0.1f, 100.0f);
+    g_ProjectionMatrix = projectionMatrix;
 
     // ====================================================================
     // End Exercise code
@@ -242,6 +304,11 @@ void drawScene(int scene, float runTime) {
         // Add your code here:
         // =====================================================
 
+        const glm::vec3 camPos     = glm::vec3(0, -1, 1);
+        const glm::vec3 up         = glm::vec3(0, 1, 0);
+        const glm::mat4 viewMatrix = lookAt(camPos, -camPos, up);
+
+        g_ViewMatrix = viewMatrix;
 
         // =====================================================
         // End Exercise code
@@ -265,6 +332,18 @@ void drawScene(int scene, float runTime) {
         // Add your code here:
         // =====================================================
 
+        glm::mat4 transformCam;
+        transformCam[3][0] = -0.8f;
+
+        glm::mat4 rotation = getRotationMatrixZAxis(angle1);
+        rotation *= transformCam;
+
+        const glm::vec3 camPos     = glm::vec3(rotation[3][0], rotation[3][1], 0.0f);
+        const glm::vec3 camDir     = glm::vec3(-sin(angle1), cos(angle1), 0.0f);
+        const glm::vec3 up         = glm::vec3(0, 0, 1);
+        const glm::mat4 viewMatrix = lookAt(camPos, camDir, up);
+
+        g_ViewMatrix = viewMatrix;
 
         // =====================================================
         // End Exercise code
