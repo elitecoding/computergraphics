@@ -83,11 +83,10 @@ glm::mat4 buildFrustum( float phiInDegree, float aspectRatio, float n, float f) 
 
     // renamed near to n and far to f in the function definition because near/far are already defined in WinDef.h, resulting in error C2100: ungültige Referenzierung
 
-    const float t =      n * tan( (phiInDegree   / 2.0f) * (M_PI / 180.0f) );
-    const float b = -1 * n * tan( (phiInDegree   / 2.0f) * (M_PI / 180.0f) );
-    const float thetaInDegree = phiInDegree * aspectRatio;
-    const float r =      n * tan( (thetaInDegree / 2.0f) * (M_PI / 180.0f) );
-    const float l = -1 * n * tan( (thetaInDegree / 2.0f) * (M_PI / 180.0f) );
+    const float t =      n * tan( (phiInDegree / 2.0f) * (M_PI / 180.0f) );
+    const float b = -1 * n * tan( (phiInDegree / 2.0f) * (M_PI / 180.0f) );
+    const float r =      n * tan( (phiInDegree / 2.0f) * (M_PI / 180.0f) ) * aspectRatio;
+    const float l = -1 * n * tan( (phiInDegree / 2.0f) * (M_PI / 180.0f) ) * aspectRatio;
 
     fm[0][0] = (2.0f * n) / (r - l);
     fm[0][1] = 0;
