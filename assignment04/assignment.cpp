@@ -25,10 +25,10 @@ using namespace std;
 // add your team members names and matrikel numbers here:
 void printStudents()
 {
-	cout << "Student Name 0, matrikel number 0" << endl;
-	cout << "Student Name 1, matrikel number 1" << endl;
-	cout << "Student Name 2, matrikel number 2" << endl;
-	cout << "Student Name 3, matrikel number 3" << endl;
+	cout << "Julian Arnold,  293370" << endl;
+	cout << "Marius Lipka,   334336" << endl;
+	cout << "Florian George, 234236" << endl;
+	cout << "Houman Biglari, 279942" << endl;
 }
 
 // Implicit edge representation for one triangle edge.
@@ -43,7 +43,10 @@ int evaluateF(const glm::vec2& p1, const glm::vec2& p2, const glm::vec2& point)
     // Assignment section a
     // Add your code here:
     // ====================================================================
-
+    
+    // Calculate 2-dimensional cross product
+    const int result = static_cast<int>((p2.x - p1.x)*(point.y - p1.y) - (p2.y - p1.y)*(point.x - p1.x));
+    return result;
 
     // ====================================================================
     // End Exercise code
@@ -78,6 +81,35 @@ void drawTriangle( const glm::vec4& p0_in, const glm::vec4& p1_in, const glm::ve
     // Add your code here:
     // ====================================================================
 
+    // Set min/max to opposite
+    minX = g_windowWidth;
+    minY = g_windowHeight;
+    maxX = 0;
+    maxY = 0;
+
+    // Set min/max to min/max of triangle points
+    minX = std::min(minX, static_cast<int>(v0.x));
+    minX = std::min(minX, static_cast<int>(v1.x));
+    minX = std::min(minX, static_cast<int>(v2.x));
+
+    maxX = std::max(maxX, static_cast<int>(v0.x)+1);
+    maxX = std::max(maxX, static_cast<int>(v1.x)+1);
+    maxX = std::max(maxX, static_cast<int>(v2.x)+1);
+
+    minY = std::min(minY, static_cast<int>(v0.y));
+    minY = std::min(minY, static_cast<int>(v1.y));
+    minY = std::min(minY, static_cast<int>(v2.y));
+
+    maxY = std::max(maxY, static_cast<int>(v0.y)+1);
+    maxY = std::max(maxY, static_cast<int>(v1.y)+1);
+    maxY = std::max(maxY, static_cast<int>(v2.y)+1);
+
+    // Clip to Screen
+    minX = std::max(minX, 1);
+    maxX = std::min(maxX, g_windowWidth  - 1);
+    minY = std::max(minY, 1);
+    maxY = std::min(maxY, g_windowHeight - 1);
+
     // ====================================================================
     // End Exercise code
     // ====================================================================
@@ -89,6 +121,12 @@ void drawTriangle( const glm::vec4& p0_in, const glm::vec4& p1_in, const glm::ve
     // Assignment section f
     // Add your code here:
     // ====================================================================
+
+    const float dotproduct = glm::dot(g_viewDir, normal);
+    if (dotproduct <= 0)
+      return;
+    
+    diffuse = dotproduct;
 
     // ====================================================================
     // End Exercise code
@@ -108,6 +146,8 @@ void drawTriangle( const glm::vec4& p0_in, const glm::vec4& p1_in, const glm::ve
 
 		// Use this function to draw the pixel
 		// Do not modify it, just call it if you want to draw the pixel given by p
+		
+          if ( (evaluateF(v0, v1, p) >= 0) && (evaluateF(v1, v2, p) >= 0) && (evaluateF(v2, v0, p) >= 0) )
                 setPixel(p[0],p[1],  diffuse * color );
 
 
@@ -145,6 +185,19 @@ void drawScene(int _scene, float _runTime) {
     // Add your code here:
     // ====================================================================
 
+    const int minX = 0;
+    const int minY = 0;
+    const int maxX = g_windowWidth;
+    const int maxY = g_windowHeight;
+    
+    for (int x = minX; x < maxX; x++)
+    {
+      for (int y = minY; y < maxY; y++)
+      {
+        setPixel(x, y, glm::vec3(0, 0, 0));
+      }
+    }
+
     // ====================================================================
     // End Exercise code
     // ====================================================================
@@ -172,6 +225,17 @@ void drawScene(int _scene, float _runTime) {
         // Add your code here:
         // ====================================================================
 
+        const float angle = -2.0f*M_PI*_runTime/10.0f;
+
+        glm::mat4 r;
+        r[0][0] =  cos(angle);
+        r[2][0] =  sin(angle);
+        r[1][1] = 1.0;
+        r[0][2] =  -sin(angle);
+        r[2][2] =  cos(angle);
+        r[3][3] = 1.0;
+  
+        g_ModelViewMatrix = g_ModelViewMatrix * r;
 
         // ====================================================================
         // End Exercise code
@@ -249,7 +313,6 @@ void drawScene(int _scene, float _runTime) {
         drawTriangle(p1,p2,p3,normal);
 
     }
-
 }
 
 void initCustomResources() {
