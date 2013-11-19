@@ -5,6 +5,10 @@
 #include "assignment.h"
 using namespace std;
 
+// Needs to be undefined under VS2008
+#undef near
+#undef far
+
 extern int g_numberOfBunnyVertices;
 extern int g_bunnyStrideSize;
 extern float g_bunnyMesh[];
